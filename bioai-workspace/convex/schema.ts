@@ -47,4 +47,13 @@ export default defineSchema({
   })
     .index("by_token", ["token"])
     .index("by_identifier", ["identifier"]),
+
+  // Add rate limiting table for Convex auth
+  authRateLimits: defineTable({
+    identifier: v.string(),
+    count: v.optional(v.number()),
+    expires: v.optional(v.number()),
+    attemptsLeft: v.optional(v.number()),
+    lastAttemptTime: v.optional(v.number()),
+  }).index("identifier", ["identifier"]),
 }); 

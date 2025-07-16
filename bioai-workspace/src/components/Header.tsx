@@ -29,11 +29,9 @@ export default function Header() {
           <Link to="/" className="nav-link">
             Home
           </Link>
-          {isAuthenticated && (
-            <Link to="/workspace" className="nav-link">
-              Workspace
-            </Link>
-          )}
+          <Link to="/workspace" className="nav-link">
+            Workspace
+          </Link>
         </nav>
         
         <div className="auth-section">
