@@ -6,6 +6,10 @@ export const { auth, signIn, signOut, store } = convexAuth({
   providers: [
     Password({
       id: "password",
+      profile: (params) => ({
+        email: String(params.email).toLowerCase(),
+        name: String(params.name ?? ""),
+      }),
     }),
     Google({
       id: "google",
