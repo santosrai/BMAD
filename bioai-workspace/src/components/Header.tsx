@@ -1,15 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useAuthActions } from '@convex-dev/auth/react';
-
-interface User {
-  name: string;
-  [key: string]: unknown;
-}
+import { useUser } from '@clerk/clerk-react';
 
 export default function Header() {
-  const { isAuthenticated, user, isLoading } = useAuth();
-  const { signOut } = useAuthActions();
+  const { isAuthenticated, isLoading, signOut } = useAuth();
+  const { user } = useUser();
 
   const handleLogout = async () => {
     try {
@@ -39,7 +34,7 @@ export default function Header() {
             <div className="auth-loading">Loading...</div>
           ) : isAuthenticated ? (
             <div className="user-menu">
-              <span className="user-name">Hello, {(user as unknown as User)?.name || 'User'}</span>
+              <span className="user-name">Hello, {user?.firstName || user?.emailAddresses[0]?.emailAddress || 'User'}</span>
               <Link to="/profile" className="nav-link">
                 Profile
               </Link>

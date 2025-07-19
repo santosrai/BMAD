@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { SignIn, SignUp } from '@clerk/clerk-react';
 import { useAuth } from '../../hooks/useAuth';
-import LoginForm from '../../components/auth/LoginForm';
-import SignUpForm from '../../components/auth/SignUpForm';
-import PasswordResetForm from '../../components/auth/PasswordResetForm';
 
-type AuthMode = 'login' | 'signup' | 'reset';
+type AuthMode = 'login' | 'signup';
 
 export default function AuthPage() {
   const [mode, setMode] = useState<AuthMode>('login');
@@ -28,37 +26,50 @@ export default function AuthPage() {
     // when isAuthenticated becomes true
   };
 
-  const renderAuthForm = () => {
-    switch (mode) {
-      case 'signup':
-        return (
-          <SignUpForm
-            onSuccess={handleAuthSuccess}
-            onSwitchToLogin={() => setMode('login')}
-          />
-        );
-      case 'reset':
-        return (
-          <PasswordResetForm
-            onSuccess={() => setMode('login')}
-            onBackToLogin={() => setMode('login')}
-          />
-        );
-      default:
-        return (
-          <LoginForm
-            onSuccess={handleAuthSuccess}
-            onSwitchToSignUp={() => setMode('signup')}
-            onForgotPassword={() => setMode('reset')}
-          />
-        );
-    }
-  };
-
   return (
     <div className="auth-page">
       <div className="auth-container">
-        {renderAuthForm()}
+        {mode === 'signup' ? (
+          <SignUp 
+            afterSignUpUrl={from}
+            signInUrl="/auth"
+            routing="path"
+            path="/auth"
+          />
+        ) : (
+          <SignIn 
+            afterSignInUrl={from}
+            signUpUrl="/auth?mode=signup"
+            routing="path"
+            path="/auth"
+          />
+        )}
+        
+        <div className="auth-switch">
+          {mode === 'login' ? (
+            <>
+              Don't have an account?{' '}
+              <button
+                type="button"
+                className="auth-switch-button"
+                onClick={() => setMode('signup')}
+              >
+                Sign Up
+              </button>
+            </>
+          ) : (
+            <>
+              Already have an account?{' '}
+              <button
+                type="button"
+                className="auth-switch-button"
+                onClick={() => setMode('login')}
+              >
+                Sign In
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

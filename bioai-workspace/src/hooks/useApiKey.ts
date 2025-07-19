@@ -3,8 +3,8 @@ import { api } from "../../convex/_generated/api";
 import { validateApiKeyConnectivity } from "../services/openrouter";
 import { useState, useCallback } from "react";
 
-export function useApiKey() {
-  const apiKeyInfo = useQuery(api.apiKeys.getApiKey);
+export function useApiKey(userId: string) {
+  const apiKeyInfo = useQuery(api.apiKeys.getApiKey, userId ? { userId } : 'skip');
   const setApiKeyMutation = useMutation(api.apiKeys.setApiKey);
   const updateStatusMutation = useMutation(api.apiKeys.updateApiKeyStatus);
   const removeApiKeyMutation = useMutation(api.apiKeys.removeApiKey);
@@ -14,11 +14,15 @@ export function useApiKey() {
 
   // Set API key with validation
   const setApiKey = useCallback(async (apiKey: string) => {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
     try {
       setValidationError(null);
       
       // Save the API key first
-      await setApiKeyMutation({ apiKey });
+      await setApiKeyMutation({ userId, apiKey });
       
       // Then validate it
       setIsValidating(true);
@@ -26,6 +30,7 @@ export function useApiKey() {
       
       // Update the validation status
       await updateStatusMutation({
+        userId,
         status: validationResult.isValid ? 'valid' : 'invalid',
         errorMessage: validationResult.error,
       });
@@ -64,6 +69,7 @@ export function useApiKey() {
 
       // Update the validation status
       await updateStatusMutation({
+        userId,
         status: validationResult.isValid ? 'valid' : 'invalid',
         errorMessage: validationResult.error,
       });
@@ -84,15 +90,19 @@ export function useApiKey() {
 
   // Remove API key
   const removeApiKey = useCallback(async () => {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
     try {
       setValidationError(null);
-      await removeApiKeyMutation();
+      await removeApiKeyMutation({ userId });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove API key';
       setValidationError(errorMessage);
       throw error;
     }
-  }, [removeApiKeyMutation]);
+  }, [removeApiKeyMutation, userId]);
 
   return {
     apiKeyInfo,

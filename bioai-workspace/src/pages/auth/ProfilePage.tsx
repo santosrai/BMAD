@@ -1,14 +1,9 @@
 import { useState, useEffect } from 'react';
-// import { useMutation } from 'convex/react';
-// import { api } from '../../../convex/_generated/api';
-import { useUserProfile } from '../../hooks/useAuth';
+import { useUser } from '@clerk/clerk-react';
 import { validateEmail } from '../../utils/auth';
 
 export default function ProfilePage() {
-  const profile = useUserProfile();
-  // TODO: Replace with actual mutation once Convex is deployed
-  // const updateProfile = useMutation(api.users.updateProfile);
-  const updateProfile = async () => { throw new Error("Profile update not implemented yet"); };
+  const { user } = useUser();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -20,13 +15,13 @@ export default function ProfilePage() {
 
   // Initialize form data when profile loads
   useEffect(() => {
-    if (profile) {
+    if (user) {
       setFormData({
-        name: profile.name || '',
-        email: profile.email || '',
+        name: user.firstName || '',
+        email: user.emailAddresses[0]?.emailAddress || '',
       });
     }
-  }, [profile]);
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -74,7 +69,10 @@ export default function ProfilePage() {
     setIsLoading(true);
     
     try {
-      await updateProfile();
+      // Update user profile using Clerk
+      await user?.update({
+        firstName: formData.name,
+      });
       
       setSuccessMessage('Profile updated successfully!');
     } catch (error) {
@@ -86,11 +84,11 @@ export default function ProfilePage() {
     }
   };
 
-  if (!profile) {
+  if (!user) {
     return (
       <div className="profile-page">
         <div className="profile-container">
-          <div className="loading">Loading profile...</div>
+          <div className="auth-loading">Loading profile...</div>
         </div>
       </div>
     );
@@ -99,13 +97,9 @@ export default function ProfilePage() {
   return (
     <div className="profile-page">
       <div className="profile-container">
-        <h1>Profile Settings</h1>
-        
-        <div className="profile-info">
-          <div className="profile-meta">
-            <p><strong>Member since:</strong> {new Date(profile._creationTime).toLocaleDateString()}</p>
-            <p><strong>Email verification:</strong> {profile.emailVerified ? 'Verified' : 'Pending'}</p>
-          </div>
+        <div className="profile-header">
+          <h1>Profile Settings</h1>
+          <p>Manage your account information and preferences</p>
         </div>
 
         <form onSubmit={handleSubmit} className="profile-form">
@@ -137,6 +131,7 @@ export default function ProfilePage() {
               disabled={isLoading}
             />
             {errors.email && <span className="error-message">{errors.email}</span>}
+            <small className="form-help">Email changes require verification</small>
           </div>
 
           {errors.submit && (
@@ -155,13 +150,6 @@ export default function ProfilePage() {
             {isLoading ? 'Updating...' : 'Update Profile'}
           </button>
         </form>
-
-        {!profile.emailVerified && (
-          <div className="email-verification-notice">
-            <h3>Email Verification Required</h3>
-            <p>Please check your email and click the verification link to complete your account setup.</p>
-          </div>
-        )}
       </div>
     </div>
   );

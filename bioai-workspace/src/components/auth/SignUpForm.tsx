@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuthActions } from '@convex-dev/auth/react';
+import { useSignUp } from '@clerk/clerk-react';
 import { validateEmail, validatePassword, getPasswordStrength } from '../../utils/auth';
 
 interface SignUpFormProps {
@@ -16,7 +16,7 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuthActions();
+  const { signUp } = useSignUp();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -80,11 +80,11 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
     setIsLoading(true);
     
     try {
-      await signIn('password', {
-        email: formData.email,
+      await signUp?.create({
+        emailAddress: formData.email,
         password: formData.password,
-        name: formData.name,
-        flow: 'signUp',
+        firstName: formData.name.split(' ')[0] || formData.name,
+        lastName: formData.name.split(' ').slice(1).join(' ') || '',
       });
       
       onSuccess?.();

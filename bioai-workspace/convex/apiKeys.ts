@@ -1,26 +1,28 @@
 import { mutation, query } from "./_generated/server";
-import { auth } from "./auth";
 import { v } from "convex/values";
 
 // Get user's API key information
 export const getApiKey = query({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await auth.getUserId(ctx);
-    if (userId === null) {
-      return null;
-    }
-    
-    const user = await ctx.db.get(userId);
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.userId))
+      .first();
+
     if (!user) {
-      return null;
+      return {
+        hasApiKey: false,
+        status: 'untested',
+        lastValidated: null,
+        errorMessage: null,
+      };
     }
 
-    // Return API key info (masked for security)
     return {
       hasApiKey: !!user.openrouterApiKey,
-      maskedApiKey: user.openrouterApiKey ? 
-        `****${user.openrouterApiKey.slice(-4)}` : null,
       status: user.apiKeyStatus || 'untested',
       lastValidated: user.apiKeyLastValidated,
       errorMessage: user.apiKeyErrorMessage,
@@ -31,96 +33,100 @@ export const getApiKey = query({
 // Set or update user's API key
 export const setApiKey = mutation({
   args: {
+    userId: v.string(),
     apiKey: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (userId === null) {
-      throw new Error("User must be authenticated");
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.userId))
+      .first();
+
+    if (!user) {
+      // Create user if doesn't exist
+      const now = Math.floor(Date.now());
+      await ctx.db.insert("users", {
+        email: args.userId,
+        openrouterApiKey: args.apiKey,
+        apiKeyStatus: 'untested',
+        apiKeyLastValidated: now,
+      });
+    } else {
+      // Update existing user
+      await ctx.db.patch(user._id, {
+        openrouterApiKey: args.apiKey,
+        apiKeyStatus: 'untested',
+        apiKeyLastValidated: Math.floor(Date.now()),
+        apiKeyErrorMessage: undefined,
+      });
     }
-
-    // Basic validation
-    if (!args.apiKey || args.apiKey.trim().length === 0) {
-      throw new Error("API key cannot be empty");
-    }
-
-    // Store the API key with initial status
-    await ctx.db.patch(userId, {
-      openrouterApiKey: args.apiKey.trim(),
-      apiKeyStatus: 'untested',
-      apiKeyLastValidated: undefined,
-      apiKeyErrorMessage: undefined,
-    });
-
-    return { success: true };
   },
 });
 
 // Update API key validation status
 export const updateApiKeyStatus = mutation({
   args: {
-    status: v.string(), // 'valid' | 'invalid' | 'untested'
+    userId: v.string(),
+    status: v.union(v.literal("valid"), v.literal("invalid"), v.literal("untested")),
     errorMessage: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (userId === null) {
-      throw new Error("User must be authenticated");
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.userId))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
     }
 
-    const updates: Record<string, unknown> = {
+    await ctx.db.patch(user._id, {
       apiKeyStatus: args.status,
-      apiKeyLastValidated: Date.now(),
-    };
-
-    if (args.errorMessage !== undefined) {
-      updates.apiKeyErrorMessage = args.errorMessage;
-    } else {
-      updates.apiKeyErrorMessage = undefined;
-    }
-
-    await ctx.db.patch(userId, updates);
-    return { success: true };
+      apiKeyLastValidated: Math.floor(Date.now()),
+      apiKeyErrorMessage: args.errorMessage,
+    });
   },
 });
 
 // Remove user's API key
 export const removeApiKey = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await auth.getUserId(ctx);
-    if (userId === null) {
-      throw new Error("User must be authenticated");
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.userId))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
     }
 
-    await ctx.db.patch(userId, {
+    await ctx.db.patch(user._id, {
       openrouterApiKey: undefined,
-      apiKeyStatus: undefined,
-      apiKeyLastValidated: undefined,
+      apiKeyStatus: 'untested',
       apiKeyErrorMessage: undefined,
     });
-
-    return { success: true };
   },
 });
 
+
 // Get the actual API key for service use (server-side only)
 export const getApiKeyForService = query({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await auth.getUserId(ctx);
-    if (userId === null) {
-      return null;
-    }
-    
-    const user = await ctx.db.get(userId);
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.userId))
+      .first();
+
     if (!user || !user.openrouterApiKey) {
       return null;
     }
 
-    return {
-      apiKey: user.openrouterApiKey,
-      status: user.apiKeyStatus,
-    };
+    return user.openrouterApiKey;
   },
 });

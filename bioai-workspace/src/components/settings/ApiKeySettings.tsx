@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import { useApiKey } from '../../hooks/useApiKey';
 import { validateApiKeyFormat, getApiKeyErrorGuidance } from '../../services/openrouter';
 
 export default function ApiKeySettings() {
+  const { user } = useAuth();
+  const userId = user?.id || user?.emailAddresses?.[0]?.emailAddress || '';
+  
   const { 
     apiKeyInfo, 
     isValidating, 
@@ -11,7 +15,7 @@ export default function ApiKeySettings() {
     validateApiKey, 
     removeApiKey,
     clearValidationError 
-  } = useApiKey();
+  } = useApiKey(userId);
 
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);

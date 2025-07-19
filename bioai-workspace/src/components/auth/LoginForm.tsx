@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuthActions } from '@convex-dev/auth/react';
+import { useSignIn } from '@clerk/clerk-react';
 import { validateEmail } from '../../utils/auth';
 
 interface LoginFormProps {
@@ -15,7 +15,7 @@ export default function LoginForm({ onSuccess, onSwitchToSignUp, onForgotPasswor
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuthActions();
+  const { signIn } = useSignIn();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -60,10 +60,9 @@ export default function LoginForm({ onSuccess, onSwitchToSignUp, onForgotPasswor
     setIsLoading(true);
     
     try {
-      await signIn('password', {
-        email: formData.email,
+      await signIn?.create({
+        identifier: formData.email,
         password: formData.password,
-        flow: 'signIn',
       });
       
       onSuccess?.();
