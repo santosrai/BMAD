@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { MessageCircle, Sparkles, Zap, Brain, Plus, Download, Settings, History, MoreHorizontal, FileText, Trash2, RefreshCw } from 'lucide-react';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import '../../styles/chat.css';
 
 interface ChatInterfaceProps {
   className?: string;
@@ -236,14 +237,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className = '' }) => {
 
   return (
     <div 
-      className={cn("relative flex flex-col h-full max-h-full bg-white rounded-xl shadow-sm border border-gray-100", className)}
+      className={cn("chat-interface relative flex flex-col h-full max-h-full bg-white rounded-xl shadow-sm border border-gray-100", className)}
       onKeyDown={handleKeyDown}
       role="region"
       aria-label="Chat interface"
       tabIndex={0}
     >
       {/* Enhanced Header with Better Spacing */}
-      <div className="flex items-center justify-between p-5 border-b border-border bg-gradient-to-r from-primary/5 to-primary/10">
+      <div className="chat-header flex items-center justify-between p-5 border-b border-border bg-gradient-to-r from-primary/5 to-primary/10">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-sm">
             <Brain className="w-5 h-5 text-primary-foreground" />
@@ -256,10 +257,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className = '' }) => {
         <div className="flex items-center gap-4">
           {/* AI Status Badge with Better Separation */}
           <div className={cn(
-            "px-3 py-1.5 rounded-full text-xs font-medium border shadow-sm transition-colors",
+            "chat-status-badge px-3 py-1.5 rounded-full text-xs font-medium border shadow-sm transition-colors",
             aiEnabled 
-              ? "bg-green-50 text-green-700 border-green-200" 
-              : "bg-muted text-muted-foreground border-border"
+              ? "active bg-green-50 text-green-700 border-green-200" 
+              : "inactive bg-muted text-muted-foreground border-border"
           )}>
             <div className={cn(
               "w-2 h-2 rounded-full mr-2 inline-block",
@@ -275,7 +276,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className = '' }) => {
               variant="ghost"
               size="sm"
               onClick={handleNewChat}
-              className="h-9 w-9 p-0 hover:bg-primary/10 text-primary border border-transparent hover:border-primary/20 shadow-sm transition-all"
+              className="chat-btn-press h-9 w-9 p-0 hover:bg-primary/10 text-primary border border-transparent hover:border-primary/20 shadow-sm transition-all"
               title="New Chat"
             >
               <Plus className="w-4 h-4" />

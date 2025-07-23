@@ -18,7 +18,7 @@ export default function MolstarTest({ structureUrl }: MolstarTestProps) {
   }, [structureUrl]);
 
   return (
-    <div style={{ width: '100%', height: '500px' }}>
+    <div style={{ width: '100%', height: '400px' }}>
       <RobustMolstarViewer ref={viewerRef}  />
     </div>
   );

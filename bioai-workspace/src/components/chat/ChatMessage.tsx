@@ -5,6 +5,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { User, Bot, Settings, RotateCcw } from 'lucide-react';
+import '../../styles/chat.css';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -63,7 +64,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRetry, isLoading }
         )}>
           {!isSystem && (
             <Avatar className={cn(
-              "w-6 h-6 shrink-0",
+              "chat-avatar-float w-6 h-6 shrink-0",
               isAssistant && "bg-blue-600",
               isUser && "bg-blue-600"
             )}>
@@ -83,10 +84,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRetry, isLoading }
         </div>
         
         <div className={cn(
-          "relative px-6 py-4 rounded-2xl shadow-sm",
-          isUser && "bg-primary text-primary-foreground",
-          isAssistant && "bg-gray-50 text-gray-800 border border-gray-200",
-          isSystem && "bg-destructive/10 text-destructive border border-destructive/20"
+          "chat-message-bubble relative px-6 py-4 rounded-2xl shadow-sm",
+          isUser && "user bg-primary text-primary-foreground",
+          isAssistant && "assistant bg-gray-50 text-gray-800 border border-gray-200",
+          isSystem && "system bg-destructive/10 text-destructive border border-destructive/20"
         )}>
           <div className="text-sm leading-relaxed space-y-2">
             {message.content.split('\n').map((line, index) => (

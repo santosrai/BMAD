@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css'
 import './styles/auth.css'
 import './styles/settings.css'
+import './styles/chat.css'
+import './styles/workspace.css'
 
 // Import components with error handling
 import Header from './components/Header';

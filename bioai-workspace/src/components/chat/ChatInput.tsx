@@ -3,6 +3,7 @@ import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import '../../styles/chat.css';
 
 interface ChatInputProps {
   value: string;
@@ -45,8 +46,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
     <div className="border-t border-border bg-background p-6">
       {/* Enhanced input container with light gray background */}
       <div className={cn(
-        "flex items-end gap-4 bg-gray-50 rounded-2xl border border-gray-200 p-5 transition-all duration-200 shadow-sm",
-        "focus-within:border-gray-300 focus-within:shadow-md focus-within:bg-gray-100/50",
+        "chat-input-container flex items-end gap-4 bg-white rounded-2xl border border-gray-200 p-5 transition-all duration-200 shadow-sm",
+        "chat-input-glow focus-within:border-gray-300 focus-within:shadow-md focus-within:bg-white",
         "hover:border-gray-300"
       )}>
         <div className="flex-1 space-y-1">
@@ -59,7 +60,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             disabled={disabled}
             rows={1}
             className={cn(
-              "min-h-[48px] max-h-[120px] resize-none border-0 bg-transparent px-0 py-2",
+              "chat-input-textarea min-h-[48px] max-h-[120px] resize-none border-0 bg-transparent px-0 py-2",
               "focus-visible:ring-0 focus-visible:ring-offset-0 text-sm text-gray-800",
               "placeholder:text-gray-500 placeholder:text-sm placeholder:font-normal",
               "disabled:cursor-not-allowed disabled:opacity-50",
@@ -74,7 +75,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           disabled={disabled || !value.trim()}
           size="icon"
           className={cn(
-            "shrink-0 h-11 w-11 bg-primary hover:bg-primary/90 border-0 text-primary-foreground",
+            "chat-btn-press shrink-0 h-11 w-11 bg-primary hover:bg-primary/90 border-0 text-primary-foreground",
             "shadow-sm hover:shadow-md transition-all duration-200",
             "disabled:opacity-30 disabled:cursor-not-allowed",
             "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"

@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { cn } from '@/lib/utils';
 import { MessageCircle, Trash2, Plus, Search, X, Calendar, Hash } from 'lucide-react';
+import '../../styles/chat.css';
 
 interface ChatSessionListProps {
   sessions: ChatSession[];
@@ -71,7 +72,7 @@ const ChatSessionList: React.FC<ChatSessionListProps> = ({
     });
 
   return (
-    <div className="absolute top-16 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-96 overflow-hidden">
+    <div className="chat-session-list absolute top-16 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-96 overflow-hidden">
       {/* Header with Search and Controls */}
       <div className="p-4 border-b border-gray-100 bg-gray-50">
         <div className="flex items-center justify-between mb-3">
@@ -151,10 +152,10 @@ const ChatSessionList: React.FC<ChatSessionListProps> = ({
               <div
                 key={session.id}
                 className={cn(
-                  "flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all duration-200 mb-1",
+                  "chat-session-item flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all duration-200 mb-1",
                   "hover:bg-gray-50 hover:shadow-sm",
                   currentSession?.id === session.id
-                    ? "bg-primary/10 border border-primary/20 shadow-sm"
+                    ? "active bg-primary/10 border border-primary/20 shadow-sm chat-session-pulse"
                     : "border border-transparent"
                 )}
                 onClick={() => onSessionSelect(session.id)}
@@ -166,11 +167,11 @@ const ChatSessionList: React.FC<ChatSessionListProps> = ({
                       "w-2 h-2 rounded-full flex-shrink-0",
                       currentSession?.id === session.id ? "bg-primary" : "bg-gray-300"
                     )} />
-                    <h4 className="text-sm font-medium text-gray-900 truncate">
+                    <h4 className="chat-session-title text-sm font-medium text-gray-900 truncate">
                       {session.title || `Chat ${session.id.slice(-8)}`}
                     </h4>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <div className="chat-session-meta flex items-center gap-2 text-xs text-gray-500">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       {formatDate(session.updatedAt)}
