@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import ApiKeySettings from '../../components/settings/ApiKeySettings';
+import DemoModeSettings from '../../components/settings/DemoModeSettings';
+import BackendUrlSettings from '../../components/settings/BackendUrlSettings';
 import '../../styles/settings.css';
 
 export default function SettingsPage() {
@@ -26,11 +28,18 @@ export default function SettingsPage() {
               </li>
               <li>
                 <button
+                  className={`settings-tab ${activeTab === 'backend' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('backend')}
+                >
+                  Backend Service
+                </button>
+              </li>
+              <li>
+                <button
                   className={`settings-tab ${activeTab === 'preferences' ? 'active' : ''}`}
                   onClick={() => setActiveTab('preferences')}
-                  disabled
                 >
-                  Preferences (Coming Soon)
+                  Preferences
                 </button>
               </li>
             </ul>
@@ -38,12 +47,8 @@ export default function SettingsPage() {
 
           <main className="settings-main">
             {activeTab === 'api-keys' && <ApiKeySettings />}
-            {activeTab === 'preferences' && (
-              <div className="coming-soon">
-                <h3>Preferences</h3>
-                <p>User preferences and workspace settings will be available in a future update.</p>
-              </div>
-            )}
+            {activeTab === 'backend' && <BackendUrlSettings />}
+            {activeTab === 'preferences' && <DemoModeSettings />}
           </main>
         </div>
       </div>

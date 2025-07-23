@@ -52,60 +52,64 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRetry, isLoading }
 
   return (
     <div className={cn(
-      "flex gap-3 mb-6 message-enter",
-      isUser && "flex-row-reverse",
-      isSystem && "justify-center"
+      "flex flex-col mb-8 message-enter max-w-[80%]",
+      isUser && "items-end ml-auto",
+      isAssistant && "items-start",
+      isSystem && "items-center max-w-full mx-auto"
     )}>
-      {!isSystem && (
-        <Avatar className={cn(
-          "w-8 h-8 shrink-0 mt-1",
-          isAssistant && "bg-blue-600"
-        )}>
-          <AvatarFallback className={cn(
-            "text-white text-xs font-medium",
-            isUser && "bg-blue-600",
-            isAssistant && "bg-blue-600"
-          )}>
-            {getMessageIcon(message.type)}
-          </AvatarFallback>
-        </Avatar>
-      )}
-      
-      <div className={cn(
-        "flex flex-col max-w-[80%]",
-        isUser && "items-end",
-        isSystem && "items-center max-w-full"
-      )}>
         <div className={cn(
-          "flex items-center gap-2 mb-1 text-xs text-gray-500",
+          "flex items-center gap-2 mb-3 text-xs text-gray-500",
           isUser && "flex-row-reverse"
         )}>
+          {!isSystem && (
+            <Avatar className={cn(
+              "w-6 h-6 shrink-0",
+              isAssistant && "bg-blue-600",
+              isUser && "bg-blue-600"
+            )}>
+              <AvatarFallback className={cn(
+                "text-white text-xs font-medium",
+                isUser && "bg-blue-600",
+                isAssistant && "bg-blue-600"
+              )}>
+                {getMessageIcon(message.type)}
+              </AvatarFallback>
+            </Avatar>
+          )}
           <span className="font-medium">
             {message.type === 'user' ? 'You' : message.type === 'assistant' ? 'BioAI' : 'System'}
           </span>
-          <span>{formatTime(message.timestamp)}</span>
           {getStatusBadge(message.status)}
         </div>
         
         <div className={cn(
-          "relative px-4 py-3 rounded-2xl max-w-full",
-          isUser && "bg-blue-600 text-white ml-auto",
-          isAssistant && "bg-gray-800 text-gray-100 border border-gray-700",
-          isSystem && "bg-yellow-900/20 text-yellow-200 border border-yellow-700"
+          "relative px-6 py-4 rounded-2xl shadow-sm",
+          isUser && "bg-primary text-primary-foreground",
+          isAssistant && "bg-gray-50 text-gray-800 border border-gray-200",
+          isSystem && "bg-destructive/10 text-destructive border border-destructive/20"
         )}>
-          <div className="text-sm leading-relaxed">
+          <div className="text-sm leading-relaxed space-y-2">
             {message.content.split('\n').map((line, index) => (
-              <p key={index} className="m-0">
+              <p key={index} className="m-0 leading-6">
                 {line || '\u00A0'}
               </p>
             ))}
           </div>
         </div>
-      
+        
+        {/* Timestamp under bubble */}
+        <div className={cn(
+          "mt-1 text-xs text-gray-400",
+          isUser && "text-right",
+          !isUser && "text-left"
+        )}>
+          {formatTime(message.timestamp)}
+        </div>
+        
         {message.status === 'error' && (
-          <div className="mt-2 p-2 bg-red-900/30 border border-red-700 rounded-lg">
+          <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-xl">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-red-300">
+              <span className="text-destructive">
                 {message.metadata?.error || 'Failed to send message'}
               </span>
               <Button 
@@ -113,7 +117,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRetry, isLoading }
                 variant="destructive"
                 onClick={onRetry}
                 disabled={isLoading}
-                className="h-7 px-2 bg-red-600 hover:bg-red-700"
+                className="h-8 px-3"
               >
                 <RotateCcw className="w-3 h-3 mr-1" />
                 Retry
@@ -121,22 +125,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRetry, isLoading }
             </div>
           </div>
         )}
-      
-        {message.metadata && (message.metadata.processingTime || message.metadata.tokenCount) && (
-          <div className="flex gap-2 mt-2 text-xs">
-            {message.metadata.processingTime && (
-              <Badge variant="secondary" className="text-xs bg-gray-700 text-gray-300">
-                ⚡ {message.metadata.processingTime}ms
-              </Badge>
-            )}
-            {message.metadata.tokenCount && (
-              <Badge variant="secondary" className="text-xs bg-gray-700 text-gray-300">
-                🔤 {message.metadata.tokenCount} tokens
-              </Badge>
-            )}
-          </div>
-        )}
-      </div>
     </div>
   );
 };

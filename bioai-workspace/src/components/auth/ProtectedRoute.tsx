@@ -11,7 +11,26 @@ export default function ProtectedRoute({ children, fallback }: ProtectedRoutePro
   const location = useLocation();
   
   try {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading, isDemoMode } = useAuth();
+
+    // If demo mode is active, always allow access
+    if (isDemoMode) {
+      return (
+        <div>
+          <div style={{ 
+            background: '#fef3c7', 
+            color: '#d97706', 
+            padding: '8px 16px', 
+            textAlign: 'center', 
+            fontSize: '14px',
+            borderBottom: '1px solid #f59e0b'
+          }}>
+            🚀 Demo Mode Active - Authentication Bypassed
+          </div>
+          {children}
+        </div>
+      );
+    }
 
     // Show loading state while checking authentication
     if (isLoading) {

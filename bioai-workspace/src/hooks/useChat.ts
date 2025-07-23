@@ -93,9 +93,13 @@ export const useChat = (userId: string): ChatHookReturn => {
   }, [userId, createSessionMutation]);
 
   const sendMessage = useCallback(async (content: string): Promise<void> => {
-    if (!content.trim() || !currentSession || !userId) return;
+    if (!content.trim() || !currentSession || !userId) {
+      console.log('useChat: sendMessage early return', { content: content.trim(), hasSession: !!currentSession, hasUserId: !!userId });
+      return;
+    }
 
     try {
+      console.log('useChat: Starting sendMessage', { content, sessionId: currentSession.id });
       setIsLoading(true);
       setError(null);
       
@@ -108,21 +112,30 @@ export const useChat = (userId: string): ChatHookReturn => {
         status: 'sent',
       });
 
+      console.log('useChat: User message added, scheduling placeholder response');
+
       // For now, add a placeholder assistant response
       // This will be replaced with actual AI integration later
       setTimeout(async () => {
-        await addMessageMutation({
-          sessionId: currentSession.id as Id<'chatSessions'>,
-          userId,
-          content: 'This is a placeholder response. AI integration will be added in future stories.',
-          type: 'assistant',
-          status: 'sent',
-        });
+        console.log('useChat: Adding placeholder response');
+        try {
+          await addMessageMutation({
+            sessionId: currentSession.id as Id<'chatSessions'>,
+            userId,
+            content: 'This is a placeholder response. AI integration will be added in future stories.',
+            type: 'assistant',
+            status: 'sent',
+          });
+          console.log('useChat: Placeholder response added successfully');
+        } catch (error) {
+          console.error('useChat: Failed to add placeholder response:', error);
+        }
       }, 1000);
 
       setInputValue('');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to send message';
+      console.error('useChat: sendMessage error:', errorMessage);
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {

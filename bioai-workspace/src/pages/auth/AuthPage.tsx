@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SignIn, SignUp } from '@clerk/clerk-react';
 import { useAuth } from '../../hooks/useAuth';
+import '../../styles/auth.css';
 
 type AuthMode = 'login' | 'signup';
 
@@ -21,54 +22,83 @@ export default function AuthPage() {
     }
   }, [isAuthenticated, navigate, from]);
 
-  const handleAuthSuccess = () => {
-    // Navigation will happen automatically via the useEffect above
-    // when isAuthenticated becomes true
+  const handleDemoMode = () => {
+    localStorage.setItem('bioai-demo-mode', 'true');
+    navigate(from, { replace: true });
   };
 
   return (
     <div className="auth-page">
       <div className="auth-container">
-        {mode === 'signup' ? (
-          <SignUp 
-            afterSignUpUrl={from}
-            signInUrl="/auth"
-            routing="path"
-            path="/auth"
-          />
-        ) : (
-          <SignIn 
-            afterSignInUrl={from}
-            signUpUrl="/auth?mode=signup"
-            routing="path"
-            path="/auth"
-          />
-        )}
-        
-        <div className="auth-switch">
-          {mode === 'login' ? (
-            <>
-              Don't have an account?{' '}
+        {/* Visual Panel */}
+        <div className="auth-visual-panel">
+          <h1>BioAI Workspace</h1>
+          <p>Molecular visualization and AI-powered analysis</p>
+        </div>
+
+        {/* Auth Form Panel */}
+        <div className="auth-form-panel">
+          <div className="auth-form">
+            {mode === 'signup' ? (
+              <SignUp 
+                afterSignUpUrl={from}
+                signInUrl="/auth"
+                routing="path"
+                path="/auth"
+              />
+            ) : (
+              <SignIn 
+                afterSignInUrl={from}
+                signUpUrl="/auth?mode=signup"
+                routing="path"
+                path="/auth"
+              />
+            )}
+            
+            <div className="auth-switch">
+              {mode === 'login' ? (
+                <>
+                  Don't have an account?{' '}
+                  <button
+                    type="button"
+                    className="auth-switch-button"
+                    onClick={() => setMode('signup')}
+                  >
+                    Sign Up
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already have an account?{' '}
+                  <button
+                    type="button"
+                    className="auth-switch-button"
+                    onClick={() => setMode('login')}
+                  >
+                    Sign In
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Demo Mode Option */}
+            <div className="demo-divider">
+              <span>OR</span>
+            </div>
+            
+            <div className="demo-section">
               <button
                 type="button"
-                className="auth-switch-button"
-                onClick={() => setMode('signup')}
+                className="auth-button demo-button"
+                onClick={handleDemoMode}
               >
-                Sign Up
+                Continue in Demo Mode
               </button>
-            </>
-          ) : (
-            <>
-              Already have an account?{' '}
-              <button
-                type="button"
-                className="auth-switch-button"
-                onClick={() => setMode('login')}
-              >
-                Sign In
-              </button>
-            </>
-          )}
+              <p className="demo-description">
+                Try the application without creating an account. Your data won't be saved.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

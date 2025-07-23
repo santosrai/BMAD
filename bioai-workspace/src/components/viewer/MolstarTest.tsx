@@ -1,17 +1,25 @@
-import React, { useRef, useEffect } from 'react';
 import RobustMolstarViewer from './RobustMolstarViewer';
 import type { ViewerControls } from './RobustMolstarViewer';
+import { useRef, useEffect } from 'react';
 
-export default function MolstarTest() {
+interface MolstarTestProps {
+  structureUrl?: string;
+}
+
+export default function MolstarTest({ structureUrl }: MolstarTestProps) {
   console.log('[MolstarTest] Rendering. Using RobustMolstarViewer.');
   const viewerRef = useRef<ViewerControls>(null);
 
   useEffect(() => {
-    // Load a sample PDB structure on mount
-    viewerRef.current?.loadStructure('https://files.rcsb.org/download/1C0A.pdb');
-  }, []);
+    if (structureUrl && viewerRef.current) {
+      console.log('[MolstarTest] Loading structure:', structureUrl);
+      viewerRef.current.loadStructure(structureUrl).catch(console.error);
+    }
+  }, [structureUrl]);
 
   return (
-    <RobustMolstarViewer ref={viewerRef}  />
+    <div style={{ width: '100%', height: '500px' }}>
+      <RobustMolstarViewer ref={viewerRef}  />
+    </div>
   );
 } 

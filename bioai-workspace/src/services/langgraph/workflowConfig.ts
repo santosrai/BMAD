@@ -287,8 +287,8 @@ export const workflowSteps = {
     const context = {
       hasActiveStructure: !!state.context.molecular.currentStructure,
       selectedResidues: state.context.molecular.selectedResidues,
-      recentQueries: state.context.session.topicsDiscussed.slice(-5),
-      userExpertise: state.context.user.expertise.level
+      recentQueries: (state.context.session?.topicsDiscussed ?? []).slice(-5),
+      userExpertise: state.context.user?.expertise?.level ?? 'intermediate'
     };
     
     return {
@@ -322,8 +322,12 @@ export const workflowSteps = {
     const toolResults = state.metadata?.toolResults || [];
     const selectedTools = state.metadata?.selectedTools || [];
     
+    // Get the user message from the messages array
+    const userMessage = state.messages.find(msg => msg._getType() === 'human');
+    const messageText = userMessage ? (typeof userMessage.content === 'string' ? userMessage.content : JSON.stringify(userMessage.content)) : '';
+    
     // Generate response based on tool results and context
-    const response = generateContextualResponse(toolResults, state.context);
+    const response = generateContextualResponse(toolResults, state.context, messageText);
     
     return {
       metadata: {
@@ -395,24 +399,60 @@ function selectToolsForIntent(intent: string, context: any): string[] {
   }
 }
 
-function generateContextualResponse(toolResults: any[], context: ConversationContext): string {
-  if (toolResults.length === 0) {
-    return "I understand your request, but I need more information to provide a helpful response.";
+function generateContextualResponse(toolResults: any[], context: ConversationContext, messageText: string = ''): string {
+  const lowerMessage = messageText.toLowerCase();
+  
+  // Handle simple greetings and general inquiries
+  if (lowerMessage.includes('hi') || lowerMessage.includes('hello') || lowerMessage.includes('hey')) {
+    return "Hello! I'm BioAI, your molecular biology assistant. I can help you with protein structures, DNA analysis, cellular processes, and much more. What would you like to learn about today?";
   }
   
-  // Generate response based on tool results and user expertise level
-  const expertise = context.user.expertise.level;
-  const responses = toolResults.map(result => {
-    if (expertise === 'expert') {
-      return generateTechnicalResponse(result);
-    } else if (expertise === 'intermediate') {
-      return generateIntermediateResponse(result);
-    } else {
-      return generateBeginnerResponse(result);
-    }
-  });
+  if (lowerMessage.includes('help') || lowerMessage.includes('what can you')) {
+    return `I'm here to help with molecular biology and bioinformatics! I can:
+• Analyze protein structures and molecular interactions
+• Explain biological processes and mechanisms
+• Help with PDB structure searches and analysis
+• Provide insights into genetics and genomics
+• Assist with bioinformatics tools and methods
+
+What specific topic would you like to explore?`;
+  }
   
-  return responses.join('\n\n');
+  if (lowerMessage.includes('protein') || lowerMessage.includes('structure')) {
+    return "I can help you analyze protein structures! Proteins are complex biomolecules made up of amino acids that fold into specific 3D shapes. The structure determines the protein's function. Would you like me to explain more about protein structure analysis, or do you have a specific protein you'd like to discuss?";
+  }
+  
+  if (lowerMessage.includes('dna') || lowerMessage.includes('gene') || lowerMessage.includes('genetic')) {
+    return "DNA and genetics are fascinating topics! DNA contains the genetic instructions for building and maintaining living organisms. Genes are segments of DNA that code for specific proteins. What aspect of genetics would you like to explore?";
+  }
+  
+  if (lowerMessage.includes('enzyme') || lowerMessage.includes('catalyst')) {
+    return "Enzymes are biological catalysts that speed up chemical reactions in living organisms. They're typically proteins that have specific active sites where substrates bind. Enzymes are crucial for metabolism and many cellular processes. What would you like to know about enzymes?";
+  }
+  
+  if (lowerMessage.includes('cell') || lowerMessage.includes('cellular')) {
+    return "Cells are the basic units of life! They contain various organelles and molecules that work together to maintain life processes. From molecular interactions to cellular signaling, there's so much to explore. What cellular process interests you?";
+  }
+  
+  // Handle cases with tool results
+  if (toolResults.length > 0) {
+    // Generate response based on tool results and user expertise level
+    const expertise = context.user.expertise.level;
+    const responses = toolResults.map(result => {
+      if (expertise === 'expert') {
+        return generateTechnicalResponse(result);
+      } else if (expertise === 'intermediate') {
+        return generateIntermediateResponse(result);
+      } else {
+        return generateBeginnerResponse(result);
+      }
+    });
+    
+    return responses.join('\n\n');
+  }
+  
+  // Default response for other cases
+  return "That's an interesting question! I'm specialized in molecular biology and bioinformatics, so I can help you with topics like protein structures, DNA analysis, cellular processes, and more. Could you tell me more about what you'd like to learn about?";
 }
 
 function generateTechnicalResponse(result: any): string {

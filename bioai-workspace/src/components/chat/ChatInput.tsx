@@ -42,34 +42,57 @@ const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="border-t border-gray-800 bg-gray-900 p-4">
-      <div className="flex items-end gap-3 bg-gray-800 rounded-lg border border-gray-700 p-3 transition-all">
-        <Textarea
-          ref={textareaRef}
-          value={value}
-          onChange={handleChange}
-          onKeyPress={onKeyPress}
-          placeholder={placeholder}
-          disabled={disabled}
-          rows={1}
-          className={cn(
-            "min-h-[40px] max-h-[120px] resize-none border-0 bg-transparent px-3 py-2 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm text-white",
-            "placeholder:text-gray-400"
-          )}
-        />
+    <div className="border-t border-border bg-background p-6">
+      {/* Enhanced input container with light gray background */}
+      <div className={cn(
+        "flex items-end gap-4 bg-gray-50 rounded-2xl border border-gray-200 p-5 transition-all duration-200 shadow-sm",
+        "focus-within:border-gray-300 focus-within:shadow-md focus-within:bg-gray-100/50",
+        "hover:border-gray-300"
+      )}>
+        <div className="flex-1 space-y-1">
+          <Textarea
+            ref={textareaRef}
+            value={value}
+            onChange={handleChange}
+            onKeyPress={onKeyPress}
+            placeholder={placeholder}
+            disabled={disabled}
+            rows={1}
+            className={cn(
+              "min-h-[48px] max-h-[120px] resize-none border-0 bg-transparent px-0 py-2",
+              "focus-visible:ring-0 focus-visible:ring-offset-0 text-sm text-gray-800",
+              "placeholder:text-gray-500 placeholder:text-sm placeholder:font-normal",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              "leading-relaxed"
+            )}
+          />
+        </div>
+        
+        {/* Enhanced send button */}
         <Button
           onClick={handleSend}
           disabled={disabled || !value.trim()}
           size="icon"
-          className="shrink-0 h-10 w-10 bg-blue-600 hover:bg-blue-700 border-0 text-white disabled:opacity-50"
+          className={cn(
+            "shrink-0 h-11 w-11 bg-primary hover:bg-primary/90 border-0 text-primary-foreground",
+            "shadow-sm hover:shadow-md transition-all duration-200",
+            "disabled:opacity-30 disabled:cursor-not-allowed",
+            "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          )}
           title="Send message (Enter)"
         >
-          <Send className="w-4 h-4" />
+          <Send className={cn(
+            "w-4 h-4 transition-transform duration-200",
+            !disabled && value.trim() && "hover:scale-110"
+          )} />
         </Button>
       </div>
-      <div className="mt-2 text-center">
-        <span className="text-xs text-gray-500">
-          Press Enter to send, Shift+Enter for new line
+      
+      {/* Instructions with better styling */}
+      <div className="mt-3 flex justify-center">
+        <span className="text-xs text-muted-foreground/60 bg-muted/30 px-3 py-1 rounded-full border border-border/50">
+          Press <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-xs font-medium">Enter</kbd> to send, 
+          <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-xs font-medium">Shift+Enter</kbd> for new line
         </span>
       </div>
     </div>

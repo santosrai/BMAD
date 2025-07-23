@@ -135,16 +135,17 @@
     }
   }
 
-  /* Typing animation enhancement */
+  /* Enhanced typing animation */
   .typing-dots {
     display: flex;
-    gap: 0.25rem;
+    gap: 0.3rem;
+    align-items: center;
   }
 
   .typing-dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    background: #6b7280;
+    width: 0.375rem;
+    height: 0.375rem;
+    background: #9ca3af;
     border-radius: 9999px;
     animation: typingBounce 1.4s infinite ease-in-out both;
     box-shadow: none;
@@ -156,12 +157,66 @@
 
   @keyframes typingBounce {
     0%, 80%, 100% {
-      transform: scale(0.7);
-      opacity: 0.5;
+      transform: translateY(0) scale(0.8);
+      opacity: 0.4;
     }
     40% {
-      transform: scale(1);
+      transform: translateY(-4px) scale(1);
       opacity: 1;
+    }
+  }
+
+  /* Smooth left-to-right pulse typing animation */
+  .typing-dots-pulse {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .typing-dot-pulse {
+    width: 0.5rem;
+    height: 0.5rem;
+    background: #9ca3af;
+    border-radius: 9999px;
+    animation: typingPulse 1.8s infinite ease-in-out;
+    opacity: 0.3;
+  }
+
+  .typing-dot-pulse:nth-child(1) { 
+    animation-delay: 0s; 
+  }
+  .typing-dot-pulse:nth-child(2) { 
+    animation-delay: 0.3s; 
+  }
+  .typing-dot-pulse:nth-child(3) { 
+    animation-delay: 0.6s; 
+  }
+
+  @keyframes typingPulse {
+    0%, 70%, 100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    35% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+
+  /* Typing bubble subtle animation */
+  .typing-bubble {
+    animation: bubblePulse 2s infinite ease-in-out;
+  }
+
+  @keyframes bubblePulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.95;
+      transform: scale(1.01);
     }
   }
 
@@ -186,6 +241,36 @@
 
   .chat-scroll::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Chat messages scroll area */
+  .chat-messages-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+    scroll-behavior: smooth;
+  }
+
+  .chat-messages-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .chat-messages-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .chat-messages-scroll::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+
+  .chat-messages-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.5);
+  }
+
+  /* Smooth scrolling for modern chat feel */
+  .chat-messages-scroll::-webkit-scrollbar-thumb:active {
+    background: rgba(156, 163, 175, 0.7);
   }
 
   /* Input focus glow */
@@ -253,5 +338,32 @@
   @keyframes sessionPulse {
     0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4); }
     50% { box-shadow: 0 0 0 10px hsl(var(--primary) / 0); }
+  }
+
+  /* Resizable panel styles */
+  .resize-active {
+    cursor: col-resize !important;
+  }
+  
+  .resize-active * {
+    cursor: col-resize !important;
+  }
+
+  /* Smooth resize transitions */
+  .resizable-panel {
+    transition: width 0.1s ease-out;
+  }
+
+  .resize-handle {
+    position: relative;
+    background: linear-gradient(90deg, transparent 45%, hsl(var(--border)) 50%, transparent 55%);
+  }
+
+  .resize-handle:hover {
+    background: linear-gradient(90deg, transparent 45%, hsl(var(--primary) / 0.3) 50%, transparent 55%);
+  }
+
+  .resize-handle:active {
+    background: linear-gradient(90deg, transparent 45%, hsl(var(--primary) / 0.5) 50%, transparent 55%);
   }
 }

@@ -17,7 +17,7 @@ import type {
 
 export class LangGraphWorkflowEngine implements AIOrchestrator {
   private config: LangGraphConfig;
-  private compiledGraph: CompiledStateGraph<typeof WorkflowStateAnnotation> | null = null;
+  private compiledGraph: CompiledStateGraph<typeof WorkflowStateAnnotation, any, any> | null = null;
   private activeWorkflows: Map<string, WorkflowStatus> = new Map();
   private workflowCounter = 0;
   private initializationPromise: Promise<void>;
@@ -27,38 +27,51 @@ export class LangGraphWorkflowEngine implements AIOrchestrator {
     // Override with user's API key if provided
     if (config?.apiKey) {
       this.config.apiKey = config.apiKey;
-      console.log('WorkflowEngine: API key provided in config:', config.apiKey ? '***' + config.apiKey.slice(-4) : 'empty');
+      // Only log once to reduce noise
+      if (!this.constructor.prototype._logged) {
+        console.log('WorkflowEngine: API key provided in config:', config.apiKey ? '***' + config.apiKey.slice(-4) : 'empty');
+        this.constructor.prototype._logged = true;
+      }
     } else {
-      console.log('WorkflowEngine: No API key provided in config');
+      if (!this.constructor.prototype._logged) {
+        console.log('WorkflowEngine: No API key provided in config');
+        this.constructor.prototype._logged = true;
+      }
     }
     this.initializationPromise = this.initialize();
   }
 
   private async initialize(): Promise<void> {
     try {
-      console.log('Starting LangGraph workflow engine initialization...');
-      console.log('Config:', this.config);
+      // Only log initialization once to reduce noise
+      if (!this.constructor.prototype._initLogged) {
+        console.log('Starting LangGraph workflow engine initialization...');
+        this.constructor.prototype._initLogged = true;
+      }
       
       if (!validateWorkflowConfig(this.config)) {
         console.error('Config validation failed!');
         throw new Error('Invalid LangGraph configuration');
       }
-      console.log('✓ Workflow config validation passed');
 
       try {
         const graph = createWorkflowGraph();
-        console.log('✓ Workflow graph created');
-        
         this.compiledGraph = graph.compile();
-        console.log('✓ Workflow graph compiled successfully');
-        console.log('Compiled graph:', this.compiledGraph);
+        
+        if (!this.constructor.prototype._compiledLogged) {
+          console.log('✓ Workflow graph compiled successfully');
+          this.constructor.prototype._compiledLogged = true;
+        }
       } catch (graphError) {
         console.error('Graph creation/compilation failed:', graphError);
         console.error('Graph error stack:', graphError instanceof Error ? graphError.stack : graphError);
         throw new Error(`Graph compilation failed: ${graphError instanceof Error ? graphError.message : 'Unknown error'}`);
       }
       
-      console.log('LangGraph workflow engine initialized successfully');
+      if (!this.constructor.prototype._successLogged) {
+        console.log('LangGraph workflow engine initialized successfully');
+        this.constructor.prototype._successLogged = true;
+      }
     } catch (error) {
       console.error('Failed to initialize LangGraph workflow engine:', error);
       console.error('Error details:', error);
@@ -75,6 +88,8 @@ export class LangGraphWorkflowEngine implements AIOrchestrator {
   ): Promise<AIWorkflowResult> {
     // Wait for initialization to complete
     await this.initializationPromise;
+    
+    const startTime = Date.now();
     
     if (!this.compiledGraph) {
       console.warn('Workflow engine not initialized, returning fallback response');
@@ -98,7 +113,6 @@ export class LangGraphWorkflowEngine implements AIOrchestrator {
     }
 
     const workflowId = this.generateWorkflowId();
-    const startTime = Date.now();
 
     try {
       // Create workflow status tracking
@@ -142,7 +156,7 @@ export class LangGraphWorkflowEngine implements AIOrchestrator {
       };
 
       // Execute the workflow
-      const result = await this.executeWorkflow(initialState, workflowStatus);
+      const result = await this.executeWorkflowWithState(initialState, workflowStatus);
       
       // Update final status
       workflowStatus.status = 'completed';
@@ -203,7 +217,11 @@ export class LangGraphWorkflowEngine implements AIOrchestrator {
     const context: ConversationContext = {
       molecular: parameters.molecular || {},
       user: parameters.user || {},
-      session: parameters.session || {},
+      session: {
+        ...(parameters.session || {}),
+        topicsDiscussed: Array.isArray(parameters.session?.topicsDiscussed) ? parameters.session.topicsDiscussed : [],
+        toolsUsed: Array.isArray(parameters.session?.toolsUsed) ? parameters.session.toolsUsed : [],
+      },
       tools: parameters.tools || {}
     };
 
@@ -233,9 +251,25 @@ export class LangGraphWorkflowEngine implements AIOrchestrator {
       errors: []
     };
 
+    // Delegate to the private method that handles state execution
+    return await this.executeWorkflowWithState(initialState, { 
+      id: initialState.metadata.workflowId, 
+      status: 'running', 
+      progress: 0, 
+      currentStep: 'execution', 
+      totalSteps: 1, 
+      startTime: Date.now(), 
+      errors: [], 
+      results: [] 
+    });
+  }
+
+  // Private method to execute workflow with state
+  private async executeWorkflowWithState(initialState: WorkflowState, workflowStatus: WorkflowStatus): Promise<AIWorkflowResult> {
+    const startTime = Date.now();
+    
     if (!this.compiledGraph) {
       console.warn('Workflow graph not compiled, returning fallback response');
-      // Return a fallback response instead of throwing
       return {
         workflowId: initialState.metadata.workflowId,
         response: "I'm having trouble processing your request with advanced features. Let me provide a basic response instead.",
@@ -254,7 +288,6 @@ export class LangGraphWorkflowEngine implements AIOrchestrator {
     }
 
     let finalState: WorkflowState;
-    const startTime = Date.now();
     try {
       // Execute the compiled graph
       const result = await this.compiledGraph.invoke(initialState);
@@ -284,8 +317,8 @@ export class LangGraphWorkflowEngine implements AIOrchestrator {
         tokensUsed: finalState.metadata?.performance?.totalTokens || 0,
         duration,
         toolsInvoked,
-        confidence: finalState.metadata?.inputAnalysis?.confidence || 0.8,
-        sources: [] // You may want to extract sources from finalState if available
+        confidence: 0.8,
+        sources: []
       },
       status: 'completed'
     };
@@ -511,6 +544,11 @@ export class LangGraphWorkflowEngine implements AIOrchestrator {
         }
       };
     }
+  }
+
+  // Add this method for interface compatibility
+  async cleanup(): Promise<void> {
+      // No resources to clean up yet
   }
 }
 

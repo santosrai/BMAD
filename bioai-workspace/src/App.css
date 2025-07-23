@@ -137,43 +137,80 @@
 
 /* Workspace Layout */
 .workspace {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.workspace h1 {
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.workspace-content {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.workspace-left {
-  min-width: 300px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   display: flex;
   flex-direction: column;
 }
 
-.workspace-right {
-  min-width: 600px;
+.workspace-header {
+  padding: 2rem 2rem 1rem 2rem;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.workspace-header h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #1e293b;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.workspace-header p {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.workspace-content {
+  flex: 1;
+  padding: 0;
+  height: calc(100vh - 140px);
+  width: 100%;
+}
+
+.pdb-search-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  min-height: 120px;
+  margin: 1.5rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid #e2e8f0;
+}
+
+.pdb-search-panel h3 {
+  margin-bottom: 1rem;
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 1.125rem;
 }
 
 .viewer-panel {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  height: fit-content;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin: 0 1.5rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2e8f0;
+}
+
+.viewer-panel h3 {
+  margin-bottom: 1rem;
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 1.125rem;
 }
 
 .chat-panel {
-  /* Remove old styling to let Shadcn/UI take over */
   background: transparent;
   border-radius: 0;
   padding: 0;

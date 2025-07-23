@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  python-langgraph-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "8000:8000"
+    environment:
+      # Service configuration
+      - LANGGRAPH_DEBUG=false
+      - LANGGRAPH_LOG_LEVEL=INFO
+      - LANGGRAPH_HOST=0.0.0.0
+      - LANGGRAPH_PORT=8000
+      
+      # AI configuration (override with your API key)
+      - LANGGRAPH_OPENAI_API_KEY=${OPENAI_API_KEY:-your_openrouter_api_key_here}
+      - LANGGRAPH_OPENAI_BASE_URL=https://openrouter.ai/api/v1
+      - LANGGRAPH_DEFAULT_MODEL=anthropic/claude-3-haiku:beta
+      
+      # Redis configuration
+      - LANGGRAPH_REDIS_URL=redis://redis:6379
+      - LANGGRAPH_CACHE_TTL=3600
+      
+      # Performance settings
+      - LANGGRAPH_MAX_CONCURRENT_REQUESTS=10
+      - LANGGRAPH_REQUEST_TIMEOUT=30
+      
+      # Scientific computing settings
+      - LANGGRAPH_MAX_STRUCTURE_SIZE_MB=10
+      - LANGGRAPH_ENABLE_STRUCTURE_CACHING=true
+      
+      # CORS settings for development
+      - LANGGRAPH_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+    depends_on:
+      - redis
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Prometheus for monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+volumes:
+  redis_data:
+  prometheus_data:
+
+networks:
+  default:
+    name: bmad-network
