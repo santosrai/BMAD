@@ -13,6 +13,7 @@ export const runWorkflow = action({
     parameters: v.any(),
     apiKey: v.optional(v.string()),
     usePythonService: v.optional(v.boolean()),
+    pythonServiceUrl: v.optional(v.string()),
   },
   handler: async (_, args) => {
     // Create Python workflow engine (Python service required)
@@ -21,7 +22,10 @@ export const runWorkflow = action({
       // Check environment variable first, then args, default to false for cloud deployment
       usePythonService: process.env.PYTHON_LANGGRAPH_SERVICE_ENABLED === 'true' ? 
         (args.usePythonService !== false) : false,
-      pythonServiceUrl: process.env.PYTHON_LANGGRAPH_SERVICE_URL || "http://localhost:8000"
+      // Use user-provided URL first, then environment variable, then localhost
+      pythonServiceUrl: args.pythonServiceUrl || 
+        process.env.PYTHON_LANGGRAPH_SERVICE_URL || 
+        "http://localhost:8000"
     };
 
     // Enhanced logging with detailed service routing info
@@ -31,7 +35,9 @@ export const runWorkflow = action({
       pythonServiceUrl: config.pythonServiceUrl,
       pythonServiceEnabled: process.env.PYTHON_LANGGRAPH_SERVICE_ENABLED,
       hasApiKey: !!args.apiKey,
-      apiKeyPreview: args.apiKey ? '***' + args.apiKey.slice(-4) : 'none'
+      apiKeyPreview: args.apiKey ? '***' + args.apiKey.slice(-4) : 'none',
+      urlSource: args.pythonServiceUrl ? 'user-configured' : 
+                 (process.env.PYTHON_LANGGRAPH_SERVICE_URL ? 'environment' : 'localhost-default')
     });
 
     const pythonEngine = createPythonWorkflowEngine(config);

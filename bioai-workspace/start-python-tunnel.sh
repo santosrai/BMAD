@@ -43,10 +43,33 @@ ngrok http 8000 --log=stdout | while read line; do
             echo "🎉 TUNNEL READY!"
             echo "Public URL: $URL"
             echo ""
+            
+            # Auto-configure Convex environment if possible
+            echo "🔧 Auto-configuring Convex environment..."
+            if command -v npx >/dev/null 2>&1; then
+                if npx convex env set PYTHON_LANGGRAPH_SERVICE_URL "$URL" 2>/dev/null; then
+                    echo "✅ Convex environment configured automatically!"
+                    echo "   PYTHON_LANGGRAPH_SERVICE_URL = $URL"
+                else
+                    echo "⚠️  Auto-configuration failed. Please run manually:"
+                    echo "   npx convex env set PYTHON_LANGGRAPH_SERVICE_URL $URL"
+                fi
+            else
+                echo "⚠️  npx not found. Please configure manually:"
+                echo "   npx convex env set PYTHON_LANGGRAPH_SERVICE_URL $URL"
+            fi
+            
+            echo ""
+            echo "🌐 Frontend Configuration:"
+            echo "You can now use the 'Auto-Detect' button in the frontend settings"
+            echo "to automatically find this URL: $URL"
+            echo ""
             echo "📋 Next steps:"
-            echo "1. Copy this URL: $URL"
-            echo "2. Run: npx convex env set PYTHON_LANGGRAPH_SERVICE_URL $URL"
-            echo "3. Test your chat - it should now use Python service!"
+            echo "1. ✅ Tunnel URL: $URL (ready)"
+            echo "2. ✅ Convex configured (if successful above)"
+            echo "3. 🔍 Use Auto-Detect in frontend settings, or"
+            echo "4. 📝 Manually paste URL in frontend: $URL"
+            echo "5. 🧪 Test your chat - it should now use Python service!"
             echo ""
             echo "⚠️  Keep this terminal open to maintain the tunnel"
             echo ""

@@ -8,6 +8,7 @@ from .workflow import router as workflow_router
 from .molecular_analysis import router as molecular_router
 from .settings import router as settings_router
 from .test import router as test_router
+from .ngrok import router as ngrok_router
 
 router = APIRouter()
 
@@ -16,6 +17,7 @@ router.include_router(workflow_router, prefix="/workflow", tags=["workflow"])
 router.include_router(molecular_router, prefix="/molecular", tags=["molecular_analysis"])
 router.include_router(settings_router, prefix="/settings", tags=["settings"])
 router.include_router(test_router, prefix="/test", tags=["testing"])
+router.include_router(ngrok_router, prefix="/ngrok", tags=["ngrok"])
 
 @router.get("/")
 async def api_v1_root():
@@ -36,6 +38,10 @@ async def api_v1_root():
             "/test/ai",
             "/test/config",
             "/test/workflow",
+            "/ngrok/url",
+            "/ngrok/info",
+            "/ngrok/status",
+            "/ngrok/refresh",
         ],
         "service": "python-langgraph-service"
     }
