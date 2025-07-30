@@ -12,7 +12,7 @@ import structlog
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from pydantic import BaseModel, Field
 
-from ...agents.langgraph_engine import LangGraphWorkflowEngine
+from ...agents.langgraph_multi_agent_engine import LangGraphMultiAgentEngine
 from ...core.chat_logger import get_chat_logger
 from app.engine import get_workflow_engine
 
@@ -49,7 +49,7 @@ class WorkflowStatusResponse(BaseModel):
 @router.post("/execute", response_model=WorkflowExecuteResponse)
 async def execute_workflow(
     request: WorkflowExecuteRequest,
-    workflow_engine: LangGraphWorkflowEngine = Depends(get_workflow_engine)
+    workflow_engine: LangGraphMultiAgentEngine = Depends(get_workflow_engine)
 ):
     """
     Execute a LangGraph workflow.
@@ -200,7 +200,7 @@ async def execute_workflow(
 @router.get("/status/{workflow_id}", response_model=WorkflowStatusResponse)
 async def get_workflow_status(
     workflow_id: str,
-    workflow_engine: LangGraphWorkflowEngine = Depends(get_workflow_engine)
+    workflow_engine: LangGraphMultiAgentEngine = Depends(get_workflow_engine)
 ):
     """
     Get status of a running workflow.
@@ -235,7 +235,7 @@ async def get_workflow_status(
 @router.post("/stop/{workflow_id}")
 async def stop_workflow(
     workflow_id: str,
-    workflow_engine: LangGraphWorkflowEngine = Depends(get_workflow_engine)
+    workflow_engine: LangGraphMultiAgentEngine = Depends(get_workflow_engine)
 ):
     """
     Stop a running workflow.

@@ -6,7 +6,7 @@ import structlog
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 
-from ...agents.langgraph_engine import LangGraphWorkflowEngine
+from ...agents.langgraph_multi_agent_engine import LangGraphMultiAgentEngine
 from ...config import get_settings
 from app.engine import get_workflow_engine
 
@@ -22,7 +22,7 @@ class TestAIRequest(BaseModel):
 @router.post("/ai")
 async def test_ai_call(
     request: TestAIRequest,
-    workflow_engine: LangGraphWorkflowEngine = Depends(get_workflow_engine)
+    workflow_engine: LangGraphMultiAgentEngine = Depends(get_workflow_engine)
 ):
     """
     Test the AI call directly to isolate issues.
@@ -38,41 +38,35 @@ async def test_ai_call(
             "api_key_preview": settings.openai_api_key[:10] + "..." if settings.openai_api_key else "None",
             "base_url": settings.openai_base_url,
             "model": settings.default_model,
-            "llm_initialized": workflow_engine.llm is not None,
-            "engine_api_key": workflow_engine.openai_api_key[:10] + "..." if workflow_engine.openai_api_key else "None"
+            "multi_agent_system": True,
+            "agents_registered": len(workflow_engine.agents)
         }
         
         logger.info("🔧 CONFIG CHECK", **config_info)
         
-        if not workflow_engine.llm:
-            raise ValueError("LLM not initialized in workflow engine")
+        if not settings.openai_api_key:
+            raise ValueError("API key not configured")
         
-        if not workflow_engine.openai_api_key:
-            raise ValueError("API key not configured in workflow engine")
-        
-        # Test direct LLM call
-        from langchain_core.messages import SystemMessage, HumanMessage
-        
-        messages = [
-            SystemMessage(content="You are BioAI, a helpful molecular biology assistant."),
-            HumanMessage(content=request.message)
-        ]
-        
-        logger.info("🤖 CALLING LLM DIRECTLY")
-        response = await workflow_engine.llm.ainvoke(messages)
+        # Test workflow execution instead of direct LLM call
+        logger.info("🤖 TESTING MULTI-AGENT WORKFLOW")
+        response = await workflow_engine.execute_workflow(
+            workflow_type="conversation_processing",
+            parameters={"message": request.message}
+        )
         
         result = {
             "success": True,
             "config": config_info,
             "request_message": request.message,
-            "ai_response": response.content,
-            "response_type": type(response).__name__,
-            "response_length": len(response.content) if response.content else 0
+            "workflow_response": response.get("response", ""),
+            "workflow_status": response.get("status", "unknown"),
+            "agents_involved": response.get("metadata", {}).get("toolsInvoked", []),
+            "execution_time": response.get("metadata", {}).get("duration", 0)
         }
         
-        logger.info("✅ AI CALL SUCCESS", 
-                   response_length=len(response.content) if response.content else 0,
-                   response_preview=response.content[:100] + "..." if response.content and len(response.content) > 100 else response.content)
+        logger.info("✅ MULTI-AGENT WORKFLOW SUCCESS", 
+                   execution_time=response.get("metadata", {}).get("duration", 0),
+                   agents_involved=response.get("metadata", {}).get("toolsInvoked", []))
         
         return result
         
@@ -126,7 +120,7 @@ async def test_config():
 @router.post("/workflow")
 async def test_workflow_execution(
     request: TestAIRequest,
-    workflow_engine: LangGraphWorkflowEngine = Depends(get_workflow_engine)
+    workflow_engine: LangGraphMultiAgentEngine = Depends(get_workflow_engine)
 ):
     """
     Test full workflow execution to see the complete flow.

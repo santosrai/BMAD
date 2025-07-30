@@ -22,7 +22,7 @@ async def reinitialize_workflow_engine():
     """Reinitialize the workflow engine with updated settings."""
     try:
         import app.engine as engine
-        from ...agents.langgraph_engine import LangGraphWorkflowEngine
+        from ...agents.langgraph_multi_agent_engine import LangGraphMultiAgentEngine, multi_agent_engine
         
         # Get updated settings
         settings = get_settings()
@@ -34,15 +34,9 @@ async def reinitialize_workflow_engine():
         if engine.workflow_engine:
             await engine.workflow_engine.cleanup()
         
-        # Create new engine with updated settings
-        engine.workflow_engine = LangGraphWorkflowEngine(
-            openai_api_key=settings.openai_api_key,
-            openai_base_url=settings.openai_base_url,
-            default_model=settings.default_model
-        )
-        
-        # Initialize the new engine
-        await engine.workflow_engine.initialize()
+        # Use the global multi-agent engine instance
+        # The multi-agent engine uses settings internally via get_settings()
+        engine.workflow_engine = multi_agent_engine
         
         logger.info("Workflow engine reinitialized with new settings",
                    base_url=settings.openai_base_url,

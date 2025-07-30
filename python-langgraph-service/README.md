@@ -1,18 +1,34 @@
-# Python LangGraph Microservice
+# Python LangGraph Multi-Agent Microservice
 
-Python-based microservice for molecular analysis and AI orchestration using LangGraph.
+Python-based microservice for molecular analysis and AI orchestration using a pure LangGraph multi-agent system.
 
 ## Overview
 
-This service replaces the TypeScript LangGraph implementation with Python-based agents capable of real molecular analysis using scientific computing libraries like BioPython and RDKit.
+This service provides a modern multi-agent architecture using LangGraph for molecular analysis workflows. It features specialized AI agents that coordinate to handle complex scientific tasks using BioPython and other scientific computing libraries.
+
+### Architecture Highlights
+
+- **Pure LangGraph Implementation**: No LangChain dependencies - uses native LangGraph StateGraph and messaging
+- **Multi-Agent System**: Specialized agents for different domains (conversation, PDB search, molecular analysis, orchestration)
+- **Agent Coordination**: Intelligent routing and handoffs between agents based on request context
+- **Real Scientific Computing**: BioPython integration for actual protein structure analysis
 
 ## Features
 
+### Multi-Agent System
+- **ConversationAgent**: Natural language processing and intent analysis
+- **PDBSearchAgent**: Protein Data Bank searches and structure retrieval
+- **MolecularAnalysisAgent**: BioPython-based protein structure analysis
+- **OrchestrationAgent**: Multi-agent workflow coordination and parallel execution
+
+### Technical Features
+- **Pure LangGraph**: Native StateGraph implementation with no LangChain dependencies
 - **FastAPI Application**: High-performance async web framework
-- **LangGraph Integration**: Python-based workflow orchestration
+- **Agent Registry**: Dynamic agent discovery and routing
+- **State Management**: Persistent workflow state across agent handoffs
 - **Health Monitoring**: Comprehensive health checks and metrics
 - **Docker Support**: Container-ready with multi-stage builds
-- **Scientific Computing Ready**: Prepared for BioPython, RDKit integration
+- **Real Scientific Computing**: BioPython integration for protein analysis
 - **OpenRouter Compatible**: Works with existing AI provider setup
 
 ## Quick Start
@@ -77,7 +93,37 @@ This service is designed to be a drop-in replacement for the TypeScript LangGrap
 
 1. **Convex Integration**: Update `convex/langgraphWorkflow.ts` to call this service
 2. **API Compatibility**: Maintains same request/response format
-3. **Fallback Support**: Can fallback to TypeScript implementation on failure
+3. **Agent Coordination**: Intelligent routing between specialized agents
+
+## Multi-Agent Workflows
+
+The system supports several workflow patterns:
+
+### Simple Conversation
+```
+User Message → ConversationAgent → Response
+```
+
+### PDB Structure Request
+```
+User Message → PDBSearchAgent → Structure Display
+```
+
+### Structure Analysis Pipeline
+```
+User Message → PDBSearchAgent → MolecularAnalysisAgent → ConversationAgent → Detailed Response
+```
+
+### Complex Orchestrated Workflow
+```
+User Message → OrchestrationAgent → [Multiple Agents in Parallel/Sequential] → Aggregated Response
+```
+
+### Agent Routing Logic
+- **ConversationAgent**: Default for general questions and natural language processing
+- **PDBSearchAgent**: Handles PDB IDs, protein names, structure display requests
+- **MolecularAnalysisAgent**: Processes analysis keywords, handles BioPython computations
+- **OrchestrationAgent**: Coordinates complex multi-step workflows
 
 ## Configuration
 

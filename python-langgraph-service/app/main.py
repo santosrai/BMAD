@@ -18,7 +18,7 @@ from starlette.responses import Response
 from .config import get_settings
 from .core.health import router as health_router
 from .core.middleware import LoggingMiddleware, CorrelationIdMiddleware
-from .agents.langgraph_engine import LangGraphWorkflowEngine
+from .agents.langgraph_multi_agent_engine import LangGraphMultiAgentEngine, multi_agent_engine
 from .api.v1 import router as api_v1_router
 import app.engine as engine
 
@@ -52,18 +52,14 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Python LangGraph microservice", version=app.version)
     
     try:
-        # Initialize workflow engine with current settings (including from settings file)
+        # Initialize multi-agent workflow engine
         current_settings = get_settings()  # Use non-cached to get latest config
         if not current_settings.openai_api_key:
             logger.warning("No OpenAI API key found in environment or settings file")
         
-        engine.workflow_engine = LangGraphWorkflowEngine(
-            openai_api_key=current_settings.openai_api_key,
-            openai_base_url=current_settings.openai_base_url,
-            default_model=current_settings.default_model
-        )
-        await engine.workflow_engine.initialize()
-        logger.info("LangGraph workflow engine initialized successfully")
+        # Use the global multi-agent engine instance
+        engine.workflow_engine = multi_agent_engine
+        logger.info("LangGraph multi-agent workflow engine initialized successfully")
         
         yield
         
